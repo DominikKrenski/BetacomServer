@@ -23,13 +23,13 @@ public final class UserHandler {
   }
 
   public void register(RoutingContext ctx) {
-    var data = Json.decodeValue(ctx.getBodyAsString(), User.class);
+    var user = Json.decodeValue(ctx.getBodyAsString(), User.class);
 
     apiService
-      .findUserByLogin(data.getLogin())
+      .findUserByLogin(user.getLogin())
       .compose(res -> {
         if (res == null) {
-          return apiService.save(data);
+          return apiService.save(user);
         } else {
           ctx.fail(new ConflictException("User already exists"));
           return null;
@@ -61,7 +61,7 @@ public final class UserHandler {
               new JWTOptions()
                 .setAlgorithm("HS512")
                 .setSubject(res.getString("_id"))
-                .setExpiresInMinutes(10)
+                .setExpiresInMinutes(30)
             );
 
         ctx.response().setStatusCode(200).end(Json.encode(new JsonObject().put("token", token)));
