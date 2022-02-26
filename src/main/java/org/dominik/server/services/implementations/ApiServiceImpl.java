@@ -5,6 +5,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import org.dominik.server.data.User;
 import org.dominik.server.services.definitions.ApiService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public final class ApiServiceImpl implements ApiService {
   private static final String USER_COLLECTION = "users";
@@ -22,12 +24,14 @@ public final class ApiServiceImpl implements ApiService {
   }
 
   public Future<String> save(User user) {
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     return client
       .save(
         USER_COLLECTION,
         new JsonObject()
           .put("login", user.getLogin())
-          .put("password", user.getPassword())
+          .put("password", passwordEncoder.encode(user.getPassword()))
       );
   }
 }
