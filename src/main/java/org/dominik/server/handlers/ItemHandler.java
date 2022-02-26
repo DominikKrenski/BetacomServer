@@ -27,9 +27,8 @@ public final class ItemHandler {
 
     if (header == null || !header.startsWith(SCHEME)) {
       ctx.fail(new UnauthorizedException("Header missing or invalid"));
+      return;
     }
-
-    assert header != null;
 
     jwtProvider
       .authenticate(new JsonObject().put("token", header.substring(7)))
@@ -46,9 +45,8 @@ public final class ItemHandler {
 
     if (header == null || !header.startsWith(SCHEME)) {
       ctx.fail(new UnauthorizedException("Header missing or invalid"));
+      return;
     }
-
-    assert header != null;
 
     jwtProvider
       .authenticate(new JsonObject().put("token", header.substring(7)))

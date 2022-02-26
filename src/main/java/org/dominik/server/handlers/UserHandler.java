@@ -45,14 +45,17 @@ public final class UserHandler {
     apiService
       .findUserByLogin(data.getLogin())
       .onSuccess(res -> {
-        if (res == null)
+        if (res == null) {
           ctx.fail(new ForbiddenException("Login or password invalid"));
+          return;
+        }
 
         PasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        assert res != null;
-        if (!encoder.matches(data.getPassword(), res.getString("password")))
+        if (!encoder.matches(data.getPassword(), res.getString("password"))) {
           ctx.fail(new ForbiddenException("Login or password invalid"));
+          return;
+        }
 
         String token =
           jwtProvider
