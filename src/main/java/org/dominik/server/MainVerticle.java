@@ -14,6 +14,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.dominik.server.errors.ApiError;
 import org.dominik.server.exceptions.BaseException;
+import org.dominik.server.handlers.ItemHandler;
 import org.dominik.server.handlers.UserHandler;
 import org.dominik.server.services.definitions.ApiService;
 import org.dominik.server.services.implementations.ApiServiceImpl;
@@ -26,7 +27,7 @@ import java.util.Properties;
 public class MainVerticle extends AbstractVerticle {
   private static final String LOGIN_URL = "/login";
   private static final String REGISTER_URL = "/register";
-  private static final String ITEMS_URLS = "/items";
+  private static final String ITEMS_URL = "/items";
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -38,8 +39,11 @@ public class MainVerticle extends AbstractVerticle {
     // create UserHandler instance
     UserHandler userHandler = new UserHandler(apiService, createJwtProvider());
 
+    // create ItemHandler instance
+    ItemHandler itemHandler = new ItemHandler(apiService, createJwtProvider());
+
     // create router instance
-    Router router = createRoutes(userHandler);
+    Router router = createRoutes(userHandler, itemHandler);
 
     server
       .requestHandler(router)
@@ -53,7 +57,7 @@ public class MainVerticle extends AbstractVerticle {
       });
   }
 
-  private Router createRoutes(UserHandler userHandler) {
+  private Router createRoutes(UserHandler userHandler, ItemHandler itemHandler) {
     Router router = Router.router(vertx);
 
     router
@@ -70,6 +74,20 @@ public class MainVerticle extends AbstractVerticle {
       .produces("application/json")
       .handler(BodyHandler.create())
       .handler(userHandler::login)
+      .failureHandler(this::handleFailure);
+
+    router
+      .post(ITEMS_URL)
+      .consumes("application/json")
+      .produces("application/json")
+      .handler(BodyHandler.create())
+      .handler(itemHandler::save)
+      .failureHandler(this::handleFailure);
+
+    router
+      .get(ITEMS_URL)
+      .produces("application/json")
+      .handler(itemHandler::getAllUserItems)
       .failureHandler(this::handleFailure);
 
     return router;
