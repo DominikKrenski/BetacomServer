@@ -20,7 +20,7 @@ public final class ApiServiceImpl implements ApiService {
 
   public Future<JsonObject> findUserByLogin(String login) {
     JsonObject query = new JsonObject().put("login", login);
-    return client.findOne(USER_COLLECTION, query, new JsonObject().putNull("_id"));
+    return client.findOne(USER_COLLECTION, query, null);
   }
 
   public Future<String> save(User user) {
